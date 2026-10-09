@@ -1,6 +1,6 @@
-import json, sys, time, httpx
+import json, os, sys, time, httpx
 
-BASE = "http://127.0.0.1:8000"
+BASE = os.environ.get("API_BASE", "http://127.0.0.1:8000")
 ok = fail = 0
 
 

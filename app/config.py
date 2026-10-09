@@ -18,6 +18,8 @@ class Settings:
     image_key: str = ""
     key_source: str = "none"  # env | file | none
     browser_id: str = ""
+    impersonate: str = "chrome131"
+    proxy_url: str = ""
     enable_browser_harvest: bool = False
     key_file: Path = field(default_factory=lambda: Path("data/image_key.txt"))
     default_resolution: str = "768x768"
@@ -32,6 +34,8 @@ class Settings:
             image_key=key,
             key_source="env" if key else "none",
             browser_id=os.environ.get("PERCHANCE_BROWSER_ID", "").strip(),
+            impersonate=os.environ.get("IMPERSONATE", "chrome131").strip() or "chrome131",
+            proxy_url=os.environ.get("PROXY_URL", "").strip(),
             enable_browser_harvest=_bool("ENABLE_BROWSER_HARVEST"),
             default_resolution=os.environ.get("IMAGE_RESOLUTION", "768x768"),
             text_max_chars=int(os.environ.get("TEXT_MAX_CHARS", "8000")),

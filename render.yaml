@@ -16,3 +16,10 @@ services:
         sync: false
       - key: CORS_ORIGINS
         value: "*"
+      # perchance.org sits behind Cloudflare; datacenter egress IPs get a
+      # managed challenge. If /probe reports "challenge": true, either switch
+      # impersonate or point PROXY_URL at a residential/mobile proxy.
+      - key: IMPERSONATE
+        value: "chrome131"
+      - key: PROXY_URL
+        sync: false

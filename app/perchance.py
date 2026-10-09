@@ -88,15 +88,22 @@ class Perchance:
         image_key: Optional[str] = None,
         browser_id: Optional[str] = None,
         session: Optional[AsyncSession] = None,
+        impersonate: str = IMPERSONATE,
+        proxy: Optional[str] = None,
     ) -> None:
         self.image_key = image_key
         self.browser_id = browser_id
+        self.impersonate = impersonate or IMPERSONATE
+        self.proxy = proxy or None
         self._session = session
         self._owns_session = session is None
 
     async def __aenter__(self) -> "Perchance":
         if self._session is None:
-            self._session = AsyncSession(impersonate=IMPERSONATE, timeout=TIMEOUT)
+            kwargs: dict[str, Any] = {"impersonate": self.impersonate, "timeout": TIMEOUT}
+            if self.proxy:
+                kwargs["proxy"] = self.proxy
+            self._session = AsyncSession(**kwargs)
         return self
 
     async def __aexit__(self, *_exc) -> None:

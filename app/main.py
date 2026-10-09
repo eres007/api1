@@ -69,7 +69,11 @@ app.add_middleware(
 
 
 def _client() -> Perchance:
-    return Perchance(image_key=keys.get() or None)
+    return Perchance(
+        image_key=keys.get() or None,
+        impersonate=settings.impersonate,
+        proxy=settings.proxy_url,
+    )
 
 
 @app.exception_handler(PerchanceError)
@@ -80,7 +84,12 @@ async def _upstream_error(_req, exc: PerchanceError):
 
 @app.get("/healthz")
 async def healthz() -> dict:
-    return {"status": "ok", "image_key": bool(keys.get())}
+    return {
+        "status": "ok",
+        "image_key": bool(keys.get()),
+        "impersonate": settings.impersonate,
+        "proxy": bool(settings.proxy_url),
+    }
 
 
 @app.get("/")
@@ -100,6 +109,36 @@ async def index() -> dict:
         },
         "docs": "/docs",
     }
+
+
+@app.get("/probe")
+async def probe() -> dict:
+    """Report whether upstream is reachable from this instance's egress IP."""
+    out: dict[str, Any] = {"impersonate": settings.impersonate, "proxy": bool(settings.proxy_url)}
+    async with _client() as p:
+        try:
+            data = await p.list_generators(1)
+            out["perchance"] = {"status": 200, "generators": len(data.get("generators") or [])}
+        except PerchanceError as exc:
+            body = str(exc.payload or exc)
+            out["perchance"] = {
+                "status": exc.status,
+                "challenge": "Just a moment" in body,
+                "detail": body[:160],
+            }
+        try:
+            chunks = []
+            async for ev in p.generate_text("hi", max_chars=50):
+                if ev.get("type") == "chunk":
+                    chunks.append(ev["text"])
+                if ev.get("type") == "done":
+                    break
+            out["text"] = {"ok": True, "sample": "".join(chunks)[:60]}
+        except PerchanceError as exc:
+            body = str(exc.payload or exc)
+            out["text"] = {"ok": False, "status": exc.status,
+                           "challenge": "Just a moment" in body, "detail": body[:160]}
+    return out
 
 
 @app.get("/generators")
