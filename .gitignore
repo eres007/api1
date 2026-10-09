@@ -1,0 +1,22 @@
+# Byte-compiled / caches
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Virtual envs
+.venv/
+venv/
+
+# Runtime data
+data/
+*.key
+*.log
+
+# Node (if the repo ever mixes stacks)
+node_modules/
+dist/
+
+# Secrets
+.env
+.env.*

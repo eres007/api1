@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: perchance-reverse-api
+    runtime: docker
+    plan: free
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: IMAGE_RESOLUTION
+        value: "768x768"
+      - key: ENABLE_BROWSER_HARVEST
+        value: "0"
+      # Paste a key harvested locally: python -m app.harvest --out data/image_key.txt
+      - key: PERCHANCE_IMAGE_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        value: "*"
